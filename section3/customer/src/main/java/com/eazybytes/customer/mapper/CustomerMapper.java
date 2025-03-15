@@ -1,5 +1,6 @@
 package com.eazybytes.customer.mapper;
 
+import com.eazybytes.customer.command.event.CustomerUpdatedEvent;
 import com.eazybytes.customer.dto.CustomerDto;
 import com.eazybytes.customer.entity.Customer;
 
@@ -25,4 +26,10 @@ public class CustomerMapper {
         return customer;
     }
 
+    public static Customer mapToCustomer(CustomerUpdatedEvent customerUpdatedEvent, Customer customer) {
+
+        customer.setName(customerUpdatedEvent.getName());
+        customer.setEmail(customerUpdatedEvent.getEmail());
+        return customer;
+    }
 }
