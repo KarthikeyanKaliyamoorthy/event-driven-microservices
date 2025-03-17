@@ -1,5 +1,6 @@
 package com.eazybytes.accounts.service.impl;
 
+import com.eazybytes.accounts.comand.event.AccountUpdatedEvent;
 import com.eazybytes.accounts.constants.AccountsConstants;
 import com.eazybytes.accounts.dto.AccountsDto;
 import com.eazybytes.accounts.entity.Accounts;
@@ -12,7 +13,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.Random;
 
 @Service
 @AllArgsConstructor
@@ -21,31 +21,16 @@ public class AccountsServiceImpl  implements IAccountsService {
     private AccountsRepository accountsRepository;
 
     /**
-     * @param mobileNumber - String
+     * @param account - Object
      */
     @Override
-    public void createAccount(String mobileNumber) {
-        Optional<Accounts> optionalAccounts= accountsRepository.findByMobileNumberAndActiveSw(mobileNumber,
+    public void createAccount(Accounts account) {
+        Optional<Accounts> optionalAccounts = accountsRepository.findByMobileNumberAndActiveSw(account.getMobileNumber(),
                 AccountsConstants.ACTIVE_SW);
-        if(optionalAccounts.isPresent()){
-            throw new AccountAlreadyExistsException("Account already registered with given mobileNumber "+mobileNumber);
+        if (optionalAccounts.isPresent()) {
+            throw new AccountAlreadyExistsException("Account already registered with given mobileNumber " + account.getMobileNumber());
         }
-        accountsRepository.save(createNewAccount(mobileNumber));
-    }
-
-    /**
-     * @param mobileNumber - String
-     * @return the new account details
-     */
-    private Accounts createNewAccount(String mobileNumber) {
-        Accounts newAccount = new Accounts();
-        newAccount.setMobileNumber(mobileNumber);
-        long randomAccNumber = 1000000000L + new Random().nextInt(900000000);
-        newAccount.setAccountNumber(randomAccNumber);
-        newAccount.setAccountType(AccountsConstants.SAVINGS);
-        newAccount.setBranchAddress(AccountsConstants.ADDRESS);
-        newAccount.setActiveSw(AccountsConstants.ACTIVE_SW);
-        return newAccount;
+        accountsRepository.save(account);
     }
 
     /**
@@ -56,23 +41,22 @@ public class AccountsServiceImpl  implements IAccountsService {
     public AccountsDto fetchAccount(String mobileNumber) {
         Accounts account = accountsRepository.findByMobileNumberAndActiveSw(mobileNumber, AccountsConstants.ACTIVE_SW)
                 .orElseThrow(() -> new ResourceNotFoundException("Account", "mobileNumber", mobileNumber)
-        );
-        AccountsDto accountsDto = AccountsMapper.mapToAccountsDto(account, new AccountsDto());
-        return accountsDto;
+                );
+        return AccountsMapper.mapToAccountsDto(account, new AccountsDto());
     }
 
     /**
-     * @param accountsDto - AccountsDto Object
+     * @param event - AccountUpdatedEvent Object
      * @return boolean indicating if the update of Account details is successful or not
      */
     @Override
-    public boolean updateAccount(AccountsDto accountsDto) {
-        Accounts account = accountsRepository.findByMobileNumberAndActiveSw(accountsDto.getMobileNumber(),
+    public boolean updateAccount(AccountUpdatedEvent event) {
+        Accounts account = accountsRepository.findByMobileNumberAndActiveSw(event.getMobileNumber(),
                 AccountsConstants.ACTIVE_SW).orElseThrow(() -> new ResourceNotFoundException("Account", "mobileNumber",
-                accountsDto.getMobileNumber()));
-        AccountsMapper.mapToAccounts(accountsDto, account);
+                event.getMobileNumber()));
+        AccountsMapper.mapEventToAccount(event, account);
         accountsRepository.save(account);
-        return  true;
+        return true;
     }
 
     /**

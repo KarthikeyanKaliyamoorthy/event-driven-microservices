@@ -30,8 +30,8 @@ public class CustomerProjection {
     @EventHandler
     public void on(CustomerUpdatedEvent customerUpdatedEvent) {
 
-        throw new RuntimeException("it's a bad day");
-//        iCustomerService.updateCustomer(customerUpdatedEvent);
+//        throw new RuntimeException("it's a bad day");
+        iCustomerService.updateCustomer(customerUpdatedEvent);
 
     }
 
