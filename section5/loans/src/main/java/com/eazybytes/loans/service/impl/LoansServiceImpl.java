@@ -111,9 +111,9 @@ public class LoansServiceImpl implements ILoansService {
             loans.setMobileNumber(mobileNumberUpdateDto.getNewMobileNumber());
             loansRepository.save(loans);
             //throw runtime exception to test compensation transaction flow.
-            throw new RuntimeException("Some error occurred while updating mobile number");
-            //updateMobileNumberStatus(mobileNumberUpdateDto);
-            //result = true;
+//            throw new RuntimeException("Some error occurred while updating mobile number");
+            updateMobileNumberStatus(mobileNumberUpdateDto);
+            result = true;
         } catch (Exception e) {
             log.error("Exception occurred while updating mobile number", e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
